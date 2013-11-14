@@ -137,7 +137,7 @@ void IterDeeping()
         int score;
 		//负极大值搜索
 		score = NegaMax(depth,0,depth);    
-		//score = alphabeta(depth,-9999,9999,0,depth);                     
+		//score = alphaBeta(depth,-9999,9999,0,depth);                     
 		pipeOut("DEBUG Depth value:%d",score);
 		pipeOut("DEBUG BestMove:[%d,%d],%d",bestMove.x,bestMove.y,bestMove.val);
 		pipeOut("DEBUG Time use:%d,time left:%d",GetTickCount()- start_time,info_timeout_turn-(GetTickCount()-start_time));
@@ -239,6 +239,91 @@ int NegaMax(int depth,int player,int MaxDepth)
 
 	return bestVal;
 }
+
+//alphaBeta by GentleH
+int alphaBeta(int depth,int alpha,int beta,int player,int MaxDepth)
+{
+	if (depth <=0)//伪叶子结点
+	{
+		return evaluate(player);
+	}
+
+	int bestMoveIndex = -1;
+	int bestVal = -10000;
+	int moveListLen  =0;
+	Mov* moveList=GenerateMoves(moveListLen,player);
+
+	if(moveListLen == 0)
+	{
+		pipeOut("gen movelist is empty");
+		delete[] moveList;
+		moveList = NULL;
+		return evaluate(player);
+	}
+	for (int i = 0; i < moveListLen; i++)
+	{
+		moveList[i].val = getHistoryScore(moveList[i],player);
+	}
+
+	moveList = MergeSort(moveList,moveListLen); //历史启发排序，alpha-beta时可用
+
+	for(int i = 0;i<moveListLen;i++)
+	{
+		if (terminate || GetTickCount() >= stopTime())
+		{
+			pipeOut("DEBUG It's time to terminate");
+			break;
+		}
+
+		MakeMove(moveList[i],player);
+
+		if (isGameOver(moveList[i]))//儿子结点为胜负已分状态，真正的叶子结点
+		{
+			if (depth == MaxDepth)
+			{
+				bestMove = moveList[i];
+			}
+			UnmakeMove(moveList[i]);
+			delete[] moveList;
+			moveList = NULL;
+			return 9999;
+		}
+
+		moveList[i].val = -alphaBeta(depth - 1, -beta, -alpha, 1 - player, MaxDepth);
+
+		UnmakeMove(moveList[i]);
+
+		if(beta <= moveList[i].val)
+		{
+			return beta;
+		}
+
+		if(alpha < moveList[i].val)
+		{
+			alpha = moveList[i].val;
+			bestMoveIndex = i;
+			if(depth == MaxDepth)
+			{
+				bestMove = moveList[i];
+			}
+		}
+	}
+
+	if(bestMoveIndex != -1)
+	{
+		enterHistoryScore(moveList[bestMoveIndex],depth,player);
+	}
+
+	if(depth == MaxDepth)
+	{
+		bestMove = moveList[bestMoveIndex];
+	}
+	delete[] moveList;
+	moveList = NULL;
+
+	return alpha;
+}
+//end by GentleH
 
 //alphaBeta搜索
 //int alphabeta(int depth,int alpha,int beta,int player,int MaxDepth)

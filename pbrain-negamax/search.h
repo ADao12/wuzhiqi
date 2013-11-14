@@ -28,7 +28,7 @@ Mov* GenerateMoves(int& moveLen,int player);
 void MakeMove(Mov m,int player);
 void UnmakeMove(Mov);
 int NegaMax(int depth,int player,int MaxDepth);
-int alphabeta(int depth,int alpha,int beta,int player,int MaxDepth);
+int alphaBeta(int depth,int alpha,int beta,int player,int MaxDepth);
 int distance(Psquare p0,Psquare p1);
 
 

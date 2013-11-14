@@ -82,7 +82,7 @@ int evaluate(int player)
 		{
 			Psquare p0 = Square(i,j);
 
-			if(p0->z != EMPTY_MOVE)
+			if(p0->z != EMPTY_MOVE || p0->z != OUTSIDE_MOVE)
 			{
 				for(k = 0;k<4;k++)
 				{
@@ -132,6 +132,13 @@ int evaluate(int player)
 	int Turn_Value =0,Opponent_Turn_Value = 0;
 
 	/*计算并返回评价值*/
+
+			//己手活四，必胜
+	if(m_nRecordCount[player][FOUR])
+			return  9990;
+	    
+	   
+
 	//对手活四，必败
 	if(m_nRecordCount[opponentPlayer][FOUR])
 			return -9990;
@@ -140,34 +147,95 @@ int evaluate(int player)
 	if(m_nRecordCount[opponentPlayer][SFOUR])
 			return -9980;
 
-		//己手活四，必胜
-	if(m_nRecordCount[player][FOUR])
-			return  9970;//必胜
+	  //已手冲四
+	if(m_nRecordCount[player][SFOUR])
+			return  9980; 
 
-	
-	if (m_nRecordCount[player][SFOUR] && m_nRecordCount[player][THREE])
+	/*
+	//己手活三
+	if (m_nRecordCount[player][THREE])
 	{
 		return 9960;
 	}
 
-	if(m_nRecordCount[opponentPlayer][THREE] && m_nRecordCount[player][SFOUR] == 0)
+	//对手活三
+	if(m_nRecordCount[opponentPlayer][THREE])
 	{
-		return -9950;
+		return -9960;
+	}
+	*/
+	
+	if(m_nRecordCount[player][THREE])
+	{
+		Turn_Value += 200*m_nRecordCount[player][THREE];
+		Turn_Value += 100*m_nRecordCount[player][STHREE];
+		Turn_Value += 50*m_nRecordCount[player][TWO];
+	}
+	else
+	{
+		Turn_Value += 50*m_nRecordCount[player][STHREE];
+		Turn_Value += 30*m_nRecordCount[player][TWO];
 	}
 
-	if (m_nRecordCount[player][THREE] > 1 &&
-		m_nRecordCount[opponentPlayer][SFOUR] ==0&&
-		m_nRecordCount[opponentPlayer][THREE]==0&&
-		m_nRecordCount[opponentPlayer][STHREE] == 0)
+	if(m_nRecordCount[opponentPlayer][THREE])
 	{
-		return 9940;
+		Opponent_Turn_Value += 200*m_nRecordCount[opponentPlayer][THREE];
+		Opponent_Turn_Value += 100*m_nRecordCount[opponentPlayer][STHREE];
+		Opponent_Turn_Value += 50*m_nRecordCount[opponentPlayer][TWO];
+	}
+	else
+	{
+		Opponent_Turn_Value += 50*m_nRecordCount[opponentPlayer][STHREE];
+		Opponent_Turn_Value += 30*m_nRecordCount[opponentPlayer][TWO];
+	}
+/*
+	//对手活三多于一个, 而己方无四和三,对手胜返回极值
+	if(m_nRecordCount[opponentPlayer][THREE] > 1 &&
+		m_nRecordCount[player][SFOUR] == 0 &&
+		m_nRecordCount[player][THREE] == 0 &&
+		m_nRecordCount[player][STHREE] == 0)
+		return -9940;
+
+	//对手冲四,对手棋子价值加300(附加的)
+	//if(m_nRecordCount[opponentPlayer][SFOUR])
+		//Opponent_Turn_Value +=300;
+
+	//己方活三多于一个,己方棋子价值加2000
+	if(m_nRecordCount[player][THREE] > 1)
+		Turn_Value += 2000;
+	else{  //否则价值加200
+		if(m_nRecordCount[player][THREE])
+			Turn_Value += 200;
 	}
 
+	//对手活三多于一个,对手棋子价值加500
+	if(m_nRecordCount[opponentPlayer][THREE] > 1)
+		Opponent_Turn_Value += 500;
+	else{
+		if(m_nRecordCount[opponentPlayer][THREE])
+			Opponent_Turn_Value += 100;
+	}
 
-	if(m_nRecordCount[player][SFOUR])
-		Turn_Value += 300;
+	//每个眠三加10
+	if(m_nRecordCount[player][STHREE])
+		Turn_Value += m_nRecordCount[player][STHREE] * 10;
+	if(m_nRecordCount[opponentPlayer][STHREE])
+		Opponent_Turn_Value += m_nRecordCount[opponentPlayer][STHREE] * 10 ;
+	
+	//每个活二加4
+	if(m_nRecordCount[player][TWO])
+		Turn_Value += m_nRecordCount[player][TWO] * 4;
+	if(m_nRecordCount[opponentPlayer][TWO])
+		Opponent_Turn_Value += m_nRecordCount[opponentPlayer][TWO] * 4;
 
+	//每个眠二加1
+	if(m_nRecordCount[player][STWO])
+		Turn_Value += m_nRecordCount[player][STWO];
+	if(m_nRecordCount[opponentPlayer][STWO])
+		Opponent_Turn_Value += m_nRecordCount[opponentPlayer][STWO];
+	*/
 
+	/*
 	if(m_nRecordCount[opponentPlayer][THREE] > 1 )
 		Opponent_Turn_Value += 2000;
 	else
@@ -196,7 +264,7 @@ int evaluate(int player)
 			Turn_Value += m_nRecordCount[player][TWO] * 4;
 		if(m_nRecordCount[opponentPlayer][TWO])
 			Opponent_Turn_Value += m_nRecordCount[opponentPlayer][TWO] * 4;
-
+*/
 		return Turn_Value - Opponent_Turn_Value;
 }
 
@@ -384,7 +452,23 @@ void AnalysisBoardType(ChessAnalyzeData* data,int direction,int*** m_nRecord,int
 			SetBoardType(direction,m_nRecord,x,y,TWO);
 			}
 		}
-		//眠二不加入判断，因为价值不大
+		//眠二
+		if (data->adjemptyPre ==0 && data->adjemptyNxt >= 3)
+		{//o**___
+			//pipeOut("DEBUG type:STWO o**___");
+			leftEdge = data->adjsamePre;
+			rightEdge = data->adjsameNxt+ data->adjemptyNxt;
+			SetAnalyzed(direction,m_nRecord,x,y,leftEdge,rightEdge);
+			SetBoardType(direction,m_nRecord,x,y,STWO);
+		}
+		if (data->adjemptyNxt == 0 && data->adjemptyPre >=3)
+		{//___**o
+			//pipeOut("DEBUG type:STWO ___**o");
+			leftEdge = data->adjsamePre + data->adjemptyPre;
+			rightEdge = data->adjsameNxt;
+			SetAnalyzed(direction,m_nRecord,x,y,leftEdge,rightEdge);
+			SetBoardType(direction,m_nRecord,x,y,STWO);
+		}
 	}
 	else if (adjsame == 1) //单独一子
 	{
@@ -430,6 +514,90 @@ void AnalysisBoardType(ChessAnalyzeData* data,int direction,int*** m_nRecord,int
 				SetBoardType(direction,m_nRecord,x,y,TWO * 2);//由于只有一子如果记录两个方向的棋型不够，所以翻倍
 			}
 			SetBoardType(direction,m_nRecord,x,y,TWO);
+		}
+		
+		//眠二
+		if (data->adjemptyPre == 0 && data->adjemptyNxt == 1 && data->jumpsameNxt == 1 && data->jumpemptyNxt >=2)
+		{//o*_*__
+		 //pipeOut("DEBUG type:STWO  o*_*__");
+			leftEdge = data->adjsamePre;
+			rightEdge = data->adjsameNxt + data->adjemptyNxt + data->jumpsameNxt;
+			SetAnalyzed(direction,m_nRecord,x,y,leftEdge,rightEdge);
+			SetBoardType(direction,m_nRecord,x,y,STWO);
+		}
+		if (data->adjemptyPre == 1 && data->jumpsamePre == 1 && data->jumpemptyPre == 0 && data->adjemptyNxt >=2)
+		{//o*_*__
+		 //pipeOut("DEBUG type:STWO  o*_*__");
+			leftEdge = data->adjsamePre + data->adjemptyPre + data->jumpsamePre;
+			rightEdge = data->adjsameNxt;
+			SetAnalyzed(direction,m_nRecord,x,y,leftEdge,rightEdge);
+			SetBoardType(direction,m_nRecord,x,y,STWO);
+		}
+		if (data->adjemptyNxt == 0 && data->adjemptyPre == 1 && data->jumpsamePre == 1 && data->jumpemptyPre >=2)
+		{//__*_*o
+		 //pipeOut("DEBUG type:STWO  __*_*o);
+			leftEdge = data->adjsamePre + data->adjemptyPre + data->jumpsamePre;
+			rightEdge = data->adjsameNxt;
+			SetAnalyzed(direction,m_nRecord,x,y,leftEdge,rightEdge);
+			SetBoardType(direction,m_nRecord,x,y,STWO);
+		}
+		if (data->adjemptyPre >=2 && data->adjemptyNxt == 1 && data->jumpsameNxt == 1 && data->jumpemptyNxt == 0)
+		{//__*_*o
+		 //pipeOut("DEBUG type:STWO  __*_*o);
+			leftEdge = data->adjsamePre;
+			rightEdge = data->adjsameNxt + data->adjemptyNxt + data->jumpsameNxt;
+			SetAnalyzed(direction,m_nRecord,x,y,leftEdge,rightEdge);
+			SetBoardType(direction,m_nRecord,x,y,STWO);
+		}
+
+		if (data->adjemptyPre == 0 && data->adjemptyNxt == 2 && data->jumpsameNxt == 1 && data->jumpemptyNxt >=1)
+		{//o*__*_
+		 //pipeOut("DEBUG type:STWO  o*__*_");
+			leftEdge = data->adjsamePre;
+			rightEdge = data->adjsameNxt + data->adjemptyNxt + data->jumpsameNxt;
+			SetAnalyzed(direction,m_nRecord,x,y,leftEdge,rightEdge);
+			SetBoardType(direction,m_nRecord,x,y,STWO);
+		}
+		if (data->adjemptyPre == 2 && data->jumpsamePre == 1 && data->jumpemptyPre == 0 && data->adjemptyNxt >=1)
+		{//o*__*_
+		 //pipeOut("DEBUG type:STWO  o*__*_");
+			leftEdge = data->adjsamePre + data->adjemptyPre + data->jumpsamePre;
+			rightEdge = data->adjsameNxt;
+			SetAnalyzed(direction,m_nRecord,x,y,leftEdge,rightEdge);
+			SetBoardType(direction,m_nRecord,x,y,STWO);
+		}
+		if (data->adjemptyNxt == 0 && data->adjemptyPre == 2 && data->jumpsamePre == 1 && data->jumpemptyPre >=1)
+		{//_*__*o
+		 //pipeOut("DEBUG type:STWO  __*_*o");
+			leftEdge = data->adjsamePre + data->adjemptyPre + data->jumpsamePre;
+			rightEdge = data->adjsameNxt;
+			SetAnalyzed(direction,m_nRecord,x,y,leftEdge,rightEdge);
+			SetBoardType(direction,m_nRecord,x,y,STWO);
+		}
+		if (data->adjemptyPre >=1 && data->adjemptyNxt == 2 && data->jumpsameNxt == 1 && data->jumpemptyNxt == 0)
+		{//_*__*o
+		 //pipeOut("DEBUG type:STWO  _*__*o");
+			leftEdge = data->adjsamePre;
+			rightEdge = data->adjsameNxt + data->adjemptyNxt + data->jumpsameNxt;
+			SetAnalyzed(direction,m_nRecord,x,y,leftEdge,rightEdge);
+			SetBoardType(direction,m_nRecord,x,y,STWO);
+		}
+
+		if (data->adjemptyNxt == 3 && data->jumpsameNxt >=1)
+		{//*___*
+		 //pipeOut("DEBUG type:STWO  *___*");
+			leftEdge = data->adjsamePre;
+			rightEdge = data->adjsameNxt + data->adjemptyNxt + 1;
+			SetAnalyzed(direction,m_nRecord,x,y,leftEdge,rightEdge);
+			SetBoardType(direction,m_nRecord,x,y,STWO);
+		}
+		if (data->adjemptyPre == 3 && data->jumpsamePre >=1)
+		{//*___*
+		 //pipeOut("DEBUG type:STWO  *___*");
+			leftEdge = data->adjsamePre + data->adjemptyPre + 1;
+			rightEdge = data->adjsameNxt;
+			SetAnalyzed(direction,m_nRecord,x,y,leftEdge,rightEdge);
+			SetBoardType(direction,m_nRecord,x,y,STWO);
 		}
 	}
 
