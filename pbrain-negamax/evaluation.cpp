@@ -133,11 +133,17 @@ int evaluate(int player)
 
 	/*计算并返回评价值*/
 
-			//己手活四，必胜
-	if(m_nRecordCount[player][FOUR])
+	//己手活四，必胜
+	if(m_nRecordCount[player][FOUR] || m_nRecordCount[player][SFOUR] > 1 || m_nRecordCount[player][SFOUR]&&m_nRecordCount[player][THREE])
 			return  9990;
-	    
-	   
+
+	//对手活四，必胜
+	if(m_nRecordCount[opponentPlayer][FOUR] || m_nRecordCount[opponentPlayer][SFOUR] > 1 || m_nRecordCount[opponentPlayer][SFOUR]&&m_nRecordCount[opponentPlayer][THREE])
+			return  -9990;
+	    /*
+	 //已手冲四
+	if(m_nRecordCount[player][SFOUR])
+			return  9980+m_nRecordCount[player][SFOUR]; 
 
 	//对手活四，必败
 	if(m_nRecordCount[opponentPlayer][FOUR])
@@ -145,25 +151,53 @@ int evaluate(int player)
 	
 	//对手冲四，必防
 	if(m_nRecordCount[opponentPlayer][SFOUR])
-			return -9980;
+			return -9980+m_nRecordCount[opponentPlayer][SFOUR];
+		*/
 
-	  //已手冲四
+	//己手double活三
+	if (m_nRecordCount[player][THREE] > 1)
+	{
+		return 9980;
+	}
+
+	//对手double活三
+	if(m_nRecordCount[opponentPlayer][THREE] > 1)
+	{
+		return -9980;
+	}
+
+	//己手活三 眠三
+	if (m_nRecordCount[player][THREE] && m_nRecordCount[player][STHREE])
+	{
+		return 9970;
+	}
+
+	//对手活三 眠三
+	if(m_nRecordCount[opponentPlayer][THREE] && m_nRecordCount[opponentPlayer][STHREE])
+	{
+		return -9970;
+	}
+
+	//已手冲四
 	if(m_nRecordCount[player][SFOUR])
-			return  9980; 
+			return  9960+m_nRecordCount[player][SFOUR]; 
+	
+	//对手冲四，必防
+	if(m_nRecordCount[opponentPlayer][SFOUR])
+			return -9960+m_nRecordCount[opponentPlayer][SFOUR];
 
-	/*
 	//己手活三
 	if (m_nRecordCount[player][THREE])
 	{
-		return 9960;
+		return 9950;
 	}
 
 	//对手活三
 	if(m_nRecordCount[opponentPlayer][THREE])
 	{
-		return -9960;
+		return -9950;
 	}
-	*/
+	
 	/*
 	//player  three alive
 	if(m_nRecordCount[player][THREE])
@@ -190,12 +224,13 @@ int evaluate(int player)
 		Opponent_Turn_Value += 3*m_nRecordCount[opponentPlayer][TWO];
 	}
 */
+
 	//对手活三多于一个, 而己方无四和三,对手胜返回极值
 	if(m_nRecordCount[opponentPlayer][THREE] > 1 &&
 		m_nRecordCount[player][SFOUR] == 0 &&
 		m_nRecordCount[player][THREE] == 0 &&
 		m_nRecordCount[player][STHREE] == 0)
-		return -9940;
+		return -9945;
 
 	//对手冲四,对手棋子价值加300(附加的)
 	//if(m_nRecordCount[opponentPlayer][SFOUR])
