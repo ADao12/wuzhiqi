@@ -164,31 +164,32 @@ int evaluate(int player)
 		return -9960;
 	}
 	*/
-	
+	/*
+	//player  three alive
 	if(m_nRecordCount[player][THREE])
 	{
-		Turn_Value += 200*m_nRecordCount[player][THREE];
-		Turn_Value += 100*m_nRecordCount[player][STHREE];
-		Turn_Value += 50*m_nRecordCount[player][TWO];
+		Turn_Value += 20*m_nRecordCount[player][THREE];
+		Turn_Value += 10*m_nRecordCount[player][STHREE];
+		Turn_Value += 5*m_nRecordCount[player][TWO];
 	}
 	else
 	{
-		Turn_Value += 50*m_nRecordCount[player][STHREE];
-		Turn_Value += 30*m_nRecordCount[player][TWO];
+		Turn_Value += 5*m_nRecordCount[player][STHREE];
+		Turn_Value += 3*m_nRecordCount[player][TWO];
 	}
 
 	if(m_nRecordCount[opponentPlayer][THREE])
 	{
-		Opponent_Turn_Value += 200*m_nRecordCount[opponentPlayer][THREE];
-		Opponent_Turn_Value += 100*m_nRecordCount[opponentPlayer][STHREE];
-		Opponent_Turn_Value += 50*m_nRecordCount[opponentPlayer][TWO];
+		Opponent_Turn_Value += 20*m_nRecordCount[opponentPlayer][THREE];
+		Opponent_Turn_Value += 10*m_nRecordCount[opponentPlayer][STHREE];
+		Opponent_Turn_Value += 5*m_nRecordCount[opponentPlayer][TWO];
 	}
 	else
 	{
-		Opponent_Turn_Value += 50*m_nRecordCount[opponentPlayer][STHREE];
-		Opponent_Turn_Value += 30*m_nRecordCount[opponentPlayer][TWO];
+		Opponent_Turn_Value += 5*m_nRecordCount[opponentPlayer][STHREE];
+		Opponent_Turn_Value += 3*m_nRecordCount[opponentPlayer][TWO];
 	}
-/*
+*/
 	//对手活三多于一个, 而己方无四和三,对手胜返回极值
 	if(m_nRecordCount[opponentPlayer][THREE] > 1 &&
 		m_nRecordCount[player][SFOUR] == 0 &&
@@ -233,7 +234,6 @@ int evaluate(int player)
 		Turn_Value += m_nRecordCount[player][STWO];
 	if(m_nRecordCount[opponentPlayer][STWO])
 		Opponent_Turn_Value += m_nRecordCount[opponentPlayer][STWO];
-	*/
 
 	/*
 	if(m_nRecordCount[opponentPlayer][THREE] > 1 )

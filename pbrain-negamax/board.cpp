@@ -231,12 +231,14 @@ int ForbiddenCheck(ChessAnalyzeData *checkData,Psquare p0)
 		else if(adjsame[i] == 3 )  //三子相连
 		{
 			//冲四检查
+			//***_*
 			if(checkData[i].adjemptyNxt == 1 && checkData[i].jumpsameNxt == 1)
 			{
 				if(KeyPointForbiddenCheck(p0,direction,checkData[i].adjsameNxt) == NO_FORBIDDEN)
 					CountFour++;
 			}
 
+			//*_***
 			if(checkData[i].adjemptyPre == 1 && checkData[i].jumpsamePre ==1)
 			{
 				if(KeyPointForbiddenCheck(p0,-direction,checkData[i].adjsamePre) == NO_FORBIDDEN)
@@ -245,14 +247,14 @@ int ForbiddenCheck(ChessAnalyzeData *checkData,Psquare p0)
 
 			//活三检查
 			bool isThree = false;
-
+			//***__   ___***__X   X_***...
 			if((checkData[i].adjemptyNxt > 2 ||checkData[i].adjemptyNxt == 2 && checkData[i].jumpsameNxt == 0) &&
 				(checkData[i].adjemptyPre > 1 || checkData[i].adjemptyPre == 1 && checkData[i].jumpsamePre == 0))
 			{
 				if(KeyPointForbiddenCheck(p0,direction,checkData[i].adjsameNxt) == NO_FORBIDDEN)
 					isThree = true;
 			}
-
+			//__***  X__***___   ***_X 
 			if((checkData[i].adjemptyPre > 2 ||checkData[i].adjemptyPre == 2 && checkData[i].jumpsamePre == 0) &&
 				(checkData[i].adjemptyNxt > 1 || checkData[i].adjemptyNxt == 1 && checkData[i].jumpsameNxt == 0))
 			{
